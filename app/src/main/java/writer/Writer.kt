@@ -2,12 +2,21 @@ package writer
 
 
 import android.os.Environment.getExternalStorageDirectory
+import java.io.File
 import java.io.FileOutputStream
 
 
-class Writer (var fileName: String){
+class Writer (var fileName: String) {
     var mode = Mode.TEXT
 
+    /**
+     * インスタンス生成時に，指定されたファイル名が，すでに作られたファイルであれば，元のファイルを削除する
+     */
+    init {
+        if (File("${getExternalStorageDirectory().path}/${this.fileName}").exists()) {
+            File("${getExternalStorageDirectory().path}/${this.fileName}").delete()
+        }
+    }
     companion object {
         enum class Mode{
             CSV, TEXT, JSON
@@ -46,7 +55,7 @@ class Writer (var fileName: String){
         mode = newMode
         fileName = fileName.split(".")
                 .let { it.take(it.size-1) }
-                .reduce { s1, s2 -> s1 + "." + s2 }
+                .reduce { s1, s2 -> "$s1.$s2" }
                 .toString()
                 .let {
                     when(mode){

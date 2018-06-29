@@ -110,7 +110,19 @@ class WriterAndroidTest {
         fis.read(readByte)
         val readText = String(readByte)
         assertEquals("ID,Group,Name\n1,H,funwari\n2,D,oisii", readText)
-        arrayOf("test.txt", "test.csv", "test.json").map { fileName -> 後始末(fileName) }    }
+        arrayOf("test.txt", "test.csv", "test.json").map { fileName -> 後始末(fileName) }
+    }
+
+    @Test
+    fun 同じファイル名で新しくインスタンスを生成するときは元のファイルを消す() {
+        val writer = Writer("test.txt")
+        writer.write("yo")
+        val writer2 = Writer("test.txt")
+
+
+        assertEquals(false, File("${Environment.getExternalStorageDirectory().path}/test.txt").exists())
+        arrayOf("test.txt", "test.csv", "test.json").map { fileName -> 後始末(fileName) }
+    }
 
     fun 後始末(fileName: String) {
         val file = File("${Environment.getExternalStorageDirectory().path}/${fileName}")

@@ -6,35 +6,48 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import me.mattak.moment.Moment
 import writer.Writer
 
 class MainActivity : AppCompatActivity() , SensorEventListener{
-    val writer = Writer("sample.csv")
+    private val gyroWriter = Writer("gyro_sample.csv")
+            .modeSelect(Writer.Companion.Mode.CSV)
+    private val axelWriter = Writer("axel_sample.csv")
             .modeSelect(Writer.Companion.Mode.CSV)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val manager = this.getSystemService(android.content.Context.SENSOR_SERVICE) as SensorManager
-        val sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        writer.addInitialColumn(arrayOf("time","axel"))
-        manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST)
+        val axelSensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val gyroSensor = manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        manager.registerListener(this, axelSensor, SensorManager.SENSOR_DELAY_FASTEST)
+        manager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_FASTEST)
+
+        gyroWriter.addInitialColumn(arrayOf("nanosecond","x","y","z"))
+        axelWriter.addInitialColumn(arrayOf("nanosecond","x","y","z"))
+
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onSensorChanged(event: SensorEvent) {
-        val result = event.values.clone()
-        val moment = Moment()
-        val time = moment.year.toString() +
-                moment.month.toString() +
-                moment.day.toString() +
-                moment.hour.toString() +
-                moment
-        val writeContent = arrayOf(time, result.toString())
+        contentWrite(event)
+        // and more...
+    }
+
+    private fun contentWrite(event: SensorEvent) {
+        val writer = when (event.sensor.type) {
+            Sensor.TYPE_GYROSCOPE -> gyroWriter
+            Sensor.TYPE_ACCELEROMETER -> axelWriter
+            else -> Writer("error")
+        }
+        val result = event.values.clone().map { fl: Float -> fl.toString() }
+        val timestamp = event.timestamp
+
+
+        val writeContent = arrayOf(timestamp.toString(), result.toString())
         writer.write(writeContent)
     }
 }
