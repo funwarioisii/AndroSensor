@@ -37,7 +37,7 @@ class Writer (var fileName: String) {
         }
     }
 
-    fun write(message: Array<String>) : Boolean {
+    fun write(message: ArrayList<String>): Boolean {
         return when(mode) {
             Mode.CSV -> {
                 writeCSV(message)
@@ -72,6 +72,10 @@ class Writer (var fileName: String) {
         writeCSV(initialColumn)
     }
 
+    fun changeFilename(fileName: String) {
+        this.fileName = fileName
+    }
+
     private fun writeCSV(message: String): Boolean {
         if (!this.fileName.endsWith(".csv")){
             return false
@@ -83,7 +87,7 @@ class Writer (var fileName: String) {
         return true
     }
 
-    private fun writeCSV(elements: Array<String>): Boolean {
+    private fun writeCSV(elements: ArrayList<String>): Boolean {
         if (!this.fileName.endsWith(".csv")){
             return false
         }
@@ -96,7 +100,7 @@ class Writer (var fileName: String) {
     }
 
     private fun writeJson(message: String): Boolean = TODO("JSON文字列でファイルに出力するやつ　あとで実装する")
-    private fun writeJson(message: Array<String>): Boolean = TODO("JSON文字列でファイルに出力するやつ　あとで実装する")
+    private fun writeJson(message: ArrayList<String>): Boolean = TODO("JSON文字列でファイルに出力するやつ　あとで実装する")
 
 
     private fun writeText(message: String): Boolean {
@@ -107,5 +111,5 @@ class Writer (var fileName: String) {
         return true
     }
 
-    private fun writeText(message: Array<String>): Boolean = TODO("あとで実装するかもしれない")
+    private fun writeText(message: ArrayList<String>): Boolean = TODO("あとで実装するかもしれない")
 }

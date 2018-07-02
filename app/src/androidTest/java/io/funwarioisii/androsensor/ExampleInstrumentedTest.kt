@@ -3,12 +3,9 @@ package io.funwarioisii.androsensor
 import android.os.Environment
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
-import android.util.Log
-
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 import writer.Writer
 import java.io.File
 import java.io.FileInputStream
@@ -101,8 +98,8 @@ class WriterAndroidTest {
     fun CSVの書き込みがうまくいくか(){
         val writer = Writer("test.txt").modeSelect(Writer.Companion.Mode.CSV)
         writer.addInitialColumn(arrayOf("ID", "Group", "Name"))
-        writer.write(arrayOf("1", "H", "funwari"))
-        writer.write(arrayOf("2", "D", "oisii"))
+        writer.write(arrayListOf("1", "H", "funwari"))
+        writer.write(arrayListOf("2", "D", "oisii"))
 
         val file = File("${Environment.getExternalStorageDirectory().path}/test.csv")
         val fis = FileInputStream(file)
@@ -122,6 +119,15 @@ class WriterAndroidTest {
 
         assertEquals(false, File("${Environment.getExternalStorageDirectory().path}/test.txt").exists())
         arrayOf("test.txt", "test.csv", "test.json").map { fileName -> 後始末(fileName) }
+    }
+
+    @Test
+    fun ファイル名を変更する() {
+        val writer = Writer("test.txt")
+        writer.changeFilename("test2.txt")
+        writer.write("")
+        assertEquals(true, File("${Environment.getExternalStorageDirectory().path}/test2.txt").exists())
+        arrayOf("test.txt", "test.csv", "test.json", "test2.txt").map { fileName -> 後始末(fileName) }
     }
 
     fun 後始末(fileName: String) {
