@@ -46,14 +46,14 @@ class MainActivity : AppCompatActivity() , SensorEventListener{
         val writer = when (event.sensor.type) {
             Sensor.TYPE_GYROSCOPE -> gyroWriter
             Sensor.TYPE_ACCELEROMETER -> axelWriter
-            else -> Writer("error")
+            else -> null
         }
         val result = event.values.clone().map { fl: Float -> fl.toString() }
         val timestamp = event.timestamp
 
-        val writeContent = arrayListOf<String>(timestamp.toString())
+        val writeContent = arrayListOf(timestamp.toString())
         result.forEach { ele -> writeContent.add(ele) }
 
-        writer.write(writeContent)
+        writer?.write(writeContent)
     }
 }
