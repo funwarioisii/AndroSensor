@@ -6,6 +6,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import writer.FirebaseDBWrite
 import writer.Writer
 
 class MainActivity : AppCompatActivity() , SensorEventListener{
@@ -19,11 +20,25 @@ class MainActivity : AppCompatActivity() , SensorEventListener{
         setContentView(R.layout.activity_main)
         val manager = this.getSystemService(android.content.Context.SENSOR_SERVICE) as SensorManager
 
-        // add target sensor type
-        val axelSensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        val gyroSensor = manager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-        manager.registerListener(this, axelSensor, SensorManager.SENSOR_DELAY_FASTEST)
-        manager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_FASTEST)
+        val availableSensorList = manager.getSensorList(Sensor.TYPE_ALL)
+        val targetSensorList = listOf(
+                Sensor.TYPE_ACCELEROMETER,
+                Sensor.TYPE_GYROSCOPE,
+                Sensor.TYPE_AMBIENT_TEMPERATURE,
+                Sensor.TYPE_LIGHT)
+
+
+        targetSensorList.forEach {
+            if (it in availableSensorList.map { availableSensor -> availableSensor.type }) {
+                val sensor = manager.getDefaultSensor(it)
+                when (sensor.type) {
+                    Sensor.TYPE_LIGHT -> manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+                    else -> manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST)
+                }
+
+
+            }
+        }
 
         gyroWriter.changeFilename("gyro_sample_${System.currentTimeMillis()}.csv")
         axelWriter.changeFilename("axel_sample_${System.currentTimeMillis()}.csv")
@@ -38,8 +53,17 @@ class MainActivity : AppCompatActivity() , SensorEventListener{
     }
 
     override fun onSensorChanged(event: SensorEvent) {
+
         contentWrite(event)
-        // and more...
+        writeToFirebase(event)
+    }
+
+    private fun writeToFirebase(event: SensorEvent) {
+        when(event.sensor.type) {
+            Sensor.TYPE_LIGHT -> {
+                FirebaseDBWrite.updateChild(event.timestamp.toString(), event.values[0])
+            }
+        }
     }
 
     private fun contentWrite(event: SensorEvent) {
