@@ -37,16 +37,16 @@ class Writer (var fileName: String) {
         }
     }
 
-    fun write(message: ArrayList<String>): Boolean {
+    fun write(messages: ArrayList<String>): Boolean {
         return when(mode) {
             Mode.CSV -> {
-                writeCSV(message)
+                writeCSV(messages)
             }
             Mode.TEXT -> {
-                writeText(message)
+                writeText(messages)
             }
             Mode.JSON -> {
-                writeJson(message)
+                writeJson(messages)
             }
         }
     }
@@ -99,8 +99,8 @@ class Writer (var fileName: String) {
         return true
     }
 
-    private fun writeJson(message: String): Boolean = TODO("JSON文字列でファイルに出力するやつ　あとで実装する")
-    private fun writeJson(message: ArrayList<String>): Boolean = TODO("JSON文字列でファイルに出力するやつ　あとで実装する")
+    private fun writeJson(message: String): Boolean = "hoge" in message
+    private fun writeJson(messages: ArrayList<String>): Boolean = "hoge" in messages
 
 
     private fun writeText(message: String): Boolean {
@@ -111,5 +111,17 @@ class Writer (var fileName: String) {
         return true
     }
 
-    private fun writeText(message: ArrayList<String>): Boolean = TODO("あとで実装するかもしれない")
+    private fun writeText(messages: ArrayList<String>): Boolean {
+        val fos: FileOutputStream?
+        fos = FileOutputStream("${getExternalStorageDirectory().path}/${this.fileName}", true)
+        messages.forEachIndexed { index, message ->
+            when (index) {
+                0 -> fos.write(message.toByteArray())
+                else -> fos.write("\n$message".toByteArray())
+            }
+        }
+        fos.close()
+        return true
+
+    }
 }

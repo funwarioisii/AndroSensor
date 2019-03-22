@@ -1,24 +1,32 @@
 package io.funwarioisii.androsensor
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import writer.FirebaseDBWrite
 import writer.Writer
+import java.util.*
+
 
 class MainActivity : AppCompatActivity() , SensorEventListener{
     private val gyroWriter = Writer("gyro_sample.csv")
             .modeSelect(Writer.Companion.Mode.CSV)
     private val axelWriter = Writer("axel_sample.csv")
             .modeSelect(Writer.Companion.Mode.CSV)
+    private var nfcAdapter: NfcAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val manager = this.getSystemService(android.content.Context.SENSOR_SERVICE) as SensorManager
+        nfcAdapter = NfcAdapter.getDefaultAdapter(applicationContext)
 
         val availableSensorList = manager.getSensorList(Sensor.TYPE_ALL)
         val targetSensorList = listOf(
@@ -44,6 +52,30 @@ class MainActivity : AppCompatActivity() , SensorEventListener{
         gyroWriter.addInitialColumn(arrayOf("nanosecond","x","y","z"))
         axelWriter.addInitialColumn(arrayOf("nanosecond","x","y","z"))
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val intent = Intent(this, this.javaClass)
+        intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, 0)
+        nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        val uid = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID)
+        val arrangedUid = Arrays.toString(uid)
+
+        // 学生証 [1, 20, -60, 14, -37, 22, -29, 30]
+        Toast.makeText(applicationContext, arrangedUid, Toast.LENGTH_SHORT).show()
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
