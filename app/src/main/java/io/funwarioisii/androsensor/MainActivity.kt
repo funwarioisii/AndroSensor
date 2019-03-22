@@ -35,8 +35,6 @@ class MainActivity : AppCompatActivity() , SensorEventListener{
                     Sensor.TYPE_LIGHT -> manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
                     else -> manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_FASTEST)
                 }
-
-
             }
         }
 
@@ -52,19 +50,13 @@ class MainActivity : AppCompatActivity() , SensorEventListener{
 
     }
 
-    override fun onSensorChanged(event: SensorEvent) {
-
-        contentWrite(event)
-        writeToFirebase(event)
+    override fun onSensorChanged(event: SensorEvent) = when (event.sensor.type) {
+            Sensor.TYPE_LIGHT -> writeToFirebase(event)
+            else -> contentWrite(event)
     }
 
-    private fun writeToFirebase(event: SensorEvent) {
-        when(event.sensor.type) {
-            Sensor.TYPE_LIGHT -> {
-                FirebaseDBWrite.updateChild(event.timestamp.toString(), event.values[0])
-            }
-        }
-    }
+    private fun writeToFirebase(event: SensorEvent) =
+            FirebaseDBWrite.updateChild(event.timestamp.toString(), event.values[0])
 
     private fun contentWrite(event: SensorEvent) {
         val writer = when (event.sensor.type) {
